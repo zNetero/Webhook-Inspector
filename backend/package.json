@@ -1,8 +1,10 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon --exec \"node --loader ts-node/esm\" src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -10,9 +12,16 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^26.1.1",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
-    "typescript": "^7.0.2"
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
   }
 }
