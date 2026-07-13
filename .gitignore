@@ -1,0 +1,15 @@
+# Dependências
+node_modules/
+
+# Arquivos de ambiente (Senhas e chaves de API)
+.env
+
+# Pastas de build/compilação
+dist/
+build/
+
+# Logs e arquivos do sistema operacional
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
