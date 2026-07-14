@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../database/index.js";
+import { getIO } from "../websocket/socket.js";
 
 type WebhookParams = { userId: string; path?: string };
 
@@ -31,7 +32,17 @@ export class WebhookController {
     });
 
         console.log(`\n[Webhook Salvo] ID: ${webhook.id} | Usuário: ${userId}`);
-        
+        const io = getIO();
+        io.to(`room:${userId}`).emit('webhook_received', {
+            id: webhook.id,
+            method: webhook.method,
+            path: webhook.path,
+            headers: req.headers,
+            query: req.query,
+            body: req.body,
+            createdAt: webhook.createdAt,
+        });
+
         res.status(200).send('Webhook recebido com sucesso');
     } catch(error){
         console.error('Erro ao salvar o webhook:', error);
