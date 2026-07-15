@@ -4,11 +4,23 @@ import { getIO } from "../websocket/socket.js";
 
 type WebhookParams = { userId: string; path?: string };
 
+const getSingleRouteParam = (value: string | string[] | undefined): string | undefined => {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    if (Array.isArray(value) && value.length > 0) {
+        return value[0];
+    }
+
+    return undefined;
+};
+
 export class WebhookController { 
 
     handle = async (req: Request<WebhookParams>, res: Response) => {
     try {
-        const userId = req.params.userId;
+        const userId = getSingleRouteParam(req.params.userId);
 
         if (!userId) {
             return res.status(400).json({ error: 'userId param is required' });
@@ -49,4 +61,31 @@ export class WebhookController {
         res.status(500).json({ error: 'Erro interno ao processar o webhook' });
         }
     };
+
+    list = async (req: Request, res: Response) => {
+        try {
+            const userId = getSingleRouteParam(req.params.userId);
+
+            if (!userId) {
+                return res.status(400).json({ error: 'userId param is required' });
+            }
+
+            const webhooks = await prisma.webhook.findMany({
+                where: { userId },
+                orderBy: { createdAt: 'desc' },
+            });
+
+            const formattedWebhooks = webhooks.map(hook => ({
+                ...hook,
+                headers: JSON.parse(hook.headers),
+                query: JSON.parse(hook.query),
+                body: JSON.parse(hook.body),
+            }))
+
+            res.status(200.).json(formattedWebhooks);
+        } catch (error) {
+            console.error('Erro ao listar webhooks:', error);
+            res.status(500).json({ error: 'Erro interno ao buscar webhooks' });
+        }
+    }
 }
