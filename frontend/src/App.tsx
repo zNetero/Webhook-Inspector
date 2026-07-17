@@ -1,11 +1,39 @@
 import { useWebhooks } from './contexts/WebhookContext';
-import { Activity, Filter, Copy, Play } from 'lucide-react';
+import { Activity, Filter, Copy, Play, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function App() {
   const { userId, webhooks } = useWebhooks();
   const [ selectedId, setSelectedId ] = useState<string | null>(null);
   const selectedWebhook = webhooks.find(hook => hook.id === selectedId);
+  const [ isReplaying, setIsReplaying ] = useState(false);
+
+  const handleReplay = async () => {
+    if (!selectedWebhook) return;
+
+    setIsReplaying(true);
+  try {
+    const targetUrl = `http://localhost:3333/h/${userId}${selectedWebhook?.path === '/' ? '' : selectedWebhook?.path}`;
+    const headersToSend = { ...selectedWebhook?.headers};
+    delete headersToSend['host'];
+    delete headersToSend['content-length'];
+    delete headersToSend['connection'];
+    
+    await fetch(targetUrl, {
+      method: selectedWebhook?.method,
+      headers: headersToSend,
+      body: ['GET', 'HEAD'].includes(selectedWebhook?.method)
+        ? undefined
+        : JSON.stringify(selectedWebhook?.body),
+    })
+  } catch (error) {
+    console.error('Erro ao reenviar o webhook:', error);
+    alert('Falha ao reenviar o evento. Verifique o console');
+
+  } finally {
+    setIsReplaying(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] p-4 md:p-8 font-sans flex flex-col items-center">
@@ -74,29 +102,22 @@ export default function App() {
               <span>{`{ }`}</span>
               PAYLOAD
             </div>
-            {}
             <Copy size={16} className="cursor-pointer hover:text-gray-800" /> 
           </div>
 
           <div className="p-6 flex-1 bg-gray-50/30 overflow-y-auto">
-            {}
             {!selectedWebhook ? (
               <div className="bg-white border border-gray-200 rounded-lg p-4 h-full shadow-inner text-gray-400 flex items-center justify-center">
                 Selecione um evento ao lado para inspecionar
               </div>
             ) : (
               <div className="space-y-6 pb-16">
-                
-                {}
                 <div>
                   <h3 className="text-xs font-bold text-gray-400 mb-2 tracking-wider">BODY</h3>
-                  {}
                   <pre className="bg-gray-800 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto shadow-inner">
                     {JSON.stringify(selectedWebhook.body, null, 2)}
                   </pre>
                 </div>
-
-                {}
                 {Object.keys(selectedWebhook.query).length > 0 && (
                   <div>
                     <h3 className="text-xs font-bold text-gray-400 mb-2 tracking-wider">QUERY PARAMS</h3>
@@ -105,15 +126,12 @@ export default function App() {
                     </pre>
                   </div>
                 )}
-
-                {}
                 <div>
                   <h3 className="text-xs font-bold text-gray-400 mb-2 tracking-wider">HEADERS</h3>
                   <pre className="bg-gray-800 text-blue-300 p-4 rounded-lg font-mono text-sm overflow-x-auto shadow-inner">
                     {JSON.stringify(selectedWebhook.headers, null, 2)}
                   </pre>
                 </div>
-
               </div>
             )}
           </div>
@@ -121,9 +139,19 @@ export default function App() {
           {}
           {selectedWebhook && (
             <div className="absolute bottom-6 right-6">
-              <button className="bg-[#FF5A36] hover:bg-[#E04826] text-white px-6 py-2 rounded-md font-bold flex items-center gap-2 transition-colors shadow-lg">
-                <Play size={16} className="fill-current" />
-                REENVIAR
+              <button 
+                onClick={handleReplay}
+                disabled={isReplaying}
+                className={`bg-[#FF5A36] hover:bg-[#E04826] text-white px-6 py-2 rounded-md font-bold flex items-center gap-2 transition-colors shadow-lg ${
+                  isReplaying ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
+              >
+                {isReplaying ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Play size={16} className="fill-current" />
+                )}
+                {isReplaying ? 'REENVIANDO...' : 'REENVIAR'}
               </button>
             </div>
           )}
