@@ -1,11 +1,15 @@
 import { useWebhooks } from './contexts/WebhookContext';
 import { Activity, Filter, Copy, Play } from 'lucide-react';
+import { useState } from 'react';
 
 export default function App() {
   const { userId, webhooks } = useWebhooks();
+  const [ selectedId, setSelectedId ] = useState<string | null>(null);
+  const selectedWebhook = webhooks.find(hook => hook.id === selectedId);
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] p-4 md:p-8 font-sans flex flex-col items-center">
+      
       {}
       <div className="w-full max-w-5xl bg-white rounded-t-xl border-t border-l border-r border-gray-200 p-4 flex items-center justify-between shadow-sm mt-8">
         <div className="flex gap-2">
@@ -14,7 +18,7 @@ export default function App() {
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
         </div>
         <div className="font-mono text-sm text-gray-600 bg-gray-100 px-4 py-1 rounded-md">
-          hooks.local/{userId}
+          hooks.local/api/webhooks/{userId}
         </div>
         <div className="flex items-center gap-2 text-green-500 text-sm font-semibold tracking-wide">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -22,8 +26,7 @@ export default function App() {
         </div>
       </div>
 
-      {}
-      <div className="w-full max-w-5xl bg-white rounded-b-xl border border-gray-200 shadow-sm flex min-h-[500px]">
+      <div className="w-full max-w-5xl bg-white rounded-b-xl border border-gray-200 shadow-sm flex min-h-[600px]">
         
         {}
         <aside className="w-1/3 border-r border-gray-200 flex flex-col bg-gray-50/50">
@@ -40,13 +43,22 @@ export default function App() {
               <p className="text-center text-gray-400 text-sm mt-4">Aguardando eventos...</p>
             ) : (
               webhooks.map((hook) => (
-                <div key={hook.id} className="p-3 bg-white border border-gray-200 rounded-md shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-300 transition-colors">
+                <div 
+                  key={hook.id} 
+                  onClick={() => setSelectedId(hook.id)}
+                  className={`p-3 border rounded-md shadow-sm flex items-center justify-between cursor-pointer transition-colors ${
+                    selectedId === hook.id 
+                      ? 'bg-blue-50 border-blue-400' 
+                      : 'bg-white border-gray-200 hover:border-blue-300'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
-                    {}
                     <span className={`font-mono font-bold text-xs ${hook.method === 'POST' ? 'text-purple-700' : 'text-blue-600'}`}>
                       {hook.method}
                     </span>
-                    <span className="font-mono text-sm text-gray-700">{hook.path}</span>
+                    <span className="font-mono text-sm text-gray-700 truncate max-w-[120px]" title={hook.path}>
+                      {hook.path}
+                    </span>
                   </div>
                   <span className="text-xs font-bold text-green-500">200</span>
                 </div>
@@ -62,22 +74,59 @@ export default function App() {
               <span>{`{ }`}</span>
               PAYLOAD
             </div>
-            <Copy size={16} className="cursor-pointer hover:text-gray-800" />
+            {}
+            <Copy size={16} className="cursor-pointer hover:text-gray-800" /> 
           </div>
 
-          <div className="p-6 flex-1 bg-gray-50/30">
+          <div className="p-6 flex-1 bg-gray-50/30 overflow-y-auto">
             {}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 h-full shadow-inner text-gray-400 flex items-center justify-center">
-              Selecione um evento ao lado para inspecionar
-            </div>
+            {!selectedWebhook ? (
+              <div className="bg-white border border-gray-200 rounded-lg p-4 h-full shadow-inner text-gray-400 flex items-center justify-center">
+                Selecione um evento ao lado para inspecionar
+              </div>
+            ) : (
+              <div className="space-y-6 pb-16">
+                
+                {}
+                <div>
+                  <h3 className="text-xs font-bold text-gray-400 mb-2 tracking-wider">BODY</h3>
+                  {}
+                  <pre className="bg-gray-800 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto shadow-inner">
+                    {JSON.stringify(selectedWebhook.body, null, 2)}
+                  </pre>
+                </div>
+
+                {}
+                {Object.keys(selectedWebhook.query).length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-400 mb-2 tracking-wider">QUERY PARAMS</h3>
+                    <pre className="bg-gray-800 text-yellow-400 p-4 rounded-lg font-mono text-sm overflow-x-auto shadow-inner">
+                      {JSON.stringify(selectedWebhook.query, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {}
+                <div>
+                  <h3 className="text-xs font-bold text-gray-400 mb-2 tracking-wider">HEADERS</h3>
+                  <pre className="bg-gray-800 text-blue-300 p-4 rounded-lg font-mono text-sm overflow-x-auto shadow-inner">
+                    {JSON.stringify(selectedWebhook.headers, null, 2)}
+                  </pre>
+                </div>
+
+              </div>
+            )}
           </div>
 
           {}
-          <div className="absolute bottom-6 right-6">
-            <button className="bg-[#FF5A36] hover:bg-[#E04826] text-white px-6 py-2 rounded-md font-bold flex items-center gap-2 transition-colors shadow-md">
-              REENVIAR
-            </button>
-          </div>
+          {selectedWebhook && (
+            <div className="absolute bottom-6 right-6">
+              <button className="bg-[#FF5A36] hover:bg-[#E04826] text-white px-6 py-2 rounded-md font-bold flex items-center gap-2 transition-colors shadow-lg">
+                <Play size={16} className="fill-current" />
+                REENVIAR
+              </button>
+            </div>
+          )}
         </main>
 
       </div>
