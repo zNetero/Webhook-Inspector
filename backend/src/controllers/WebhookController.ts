@@ -28,9 +28,9 @@ export class WebhookController {
 
         const path = req.params.path ? `/${req.params.path}` : '/';
 
-        const headersStr = JSON.stringify(req.headers);
-        const queryStr = JSON.stringify(req.query);
-        const bodyStr = JSON.stringify(req.body);
+        const headersStr = JSON.stringify(req.headers || {});
+        const queryStr = JSON.stringify(req.query || {});
+        const bodyStr = JSON.stringify(req.body || {});
 
         const webhook = await prisma.webhook.create({
             data:{
