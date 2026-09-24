@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { getApiUrl } from '../lib/api';
 
 //Tipagem (Interface)
 export interface WebhookData {
@@ -36,12 +37,14 @@ export function WebhookProvider({ children }: { children: ReactNode }) {
   const [webhooks, setWebhooks] = useState<WebhookData[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:3333/api/webhooks/${userId}`)
+    const apiUrl = getApiUrl();
+
+    fetch(`${apiUrl}/api/webhooks/${userId}`)
       .then((res) => res.json())
       .then((data) => setWebhooks(data))
       .catch((err) => console.error('Erro ao buscar histórico:', err));
 
-    const socket: Socket = io('http://localhost:3333');
+    const socket: Socket = io(apiUrl);
 
     socket.on('connect', () => {
       socket.emit('join_session', userId);

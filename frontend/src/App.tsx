@@ -1,6 +1,7 @@
 import { useWebhooks } from './contexts/WebhookContext';
 import { Activity, Filter, Copy, Play, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { getWebhookCaptureUrl } from './lib/api';
 
 export default function App() {
   const { userId, webhooks } = useWebhooks();
@@ -13,7 +14,11 @@ export default function App() {
 
     setIsReplaying(true);
   try {
-    const targetUrl = `http://localhost:3333/h/${userId}${selectedWebhook?.path === '/' ? '' : selectedWebhook?.path}`;
+    const pathSuffix =
+      selectedWebhook?.path && selectedWebhook.path !== '/'
+        ? selectedWebhook.path.replace(/^\//, '')
+        : '';
+    const targetUrl = getWebhookCaptureUrl(userId, pathSuffix);
     const headersToSend = { ...selectedWebhook?.headers};
     delete headersToSend['host'];
     delete headersToSend['content-length'];
@@ -46,7 +51,7 @@ export default function App() {
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
         </div>
         <div className="font-mono text-sm text-gray-600 bg-gray-100 px-4 py-1 rounded-md">
-          hooks.local/api/webhooks/{userId}
+          {getWebhookCaptureUrl(userId)}
         </div>
         <div className="flex items-center gap-2 text-green-500 text-sm font-semibold tracking-wide">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
