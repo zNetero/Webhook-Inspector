@@ -1,36 +1,62 @@
-Webhook Inspector
+# Webhook Inspector
 
-O que o projeto faz
+Ferramenta para **inspecionar webhooks em tempo real**: cada sessão recebe uma URL única, qualquer método HTTP é aceito na rota de captura, e a interface atualiza ao vivo via WebSocket.
 
-Cria uma URL única por sessão de usuário.
+## Funcionalidades
 
-Aceita qualquer método HTTP na rota de captura.
+- URL única por sessão (`/h/{userId}`)
+- Body, headers e query params em JSON
+- Replay com um clique
+- Histórico persistido no banco
 
-Atualiza a interface ao vivo toda vez que um evento chega, sem precisar recarregar a página.
+## Rodar com Docker (recomendado)
 
-Mostra o formato JSON contendo o Body, Headers e Query Params da requisição.
+Requisitos: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-Possui uma função de "Replay" com um clique, que reenvia o mesmo webhook para o backend local, poupando o trabalho de ter que ir no painel do serviço externo engatilhar outro evento de teste.
+```bash
+docker compose up --build
+```
 
-Como rodar na sua máquina
+| Serviço   | URL |
+|-----------|-----|
+| Interface | http://localhost:8080 |
+| API       | http://localhost:3333 |
 
-Se você quiser testar o projeto localmente, os passos são bem simples. Você apenas precisará ter o Node.js instalado.
-Clone este repositório.
-Abra o terminal na pasta raiz do projeto.
+## Rodar sem Docker (desenvolvimento)
 
-Para rodar o backend:
-Navegue até a pasta do backend, instale as dependências, crie as tabelas do banco de dados e inicie o servidor.
-Bash
+1. Suba só o PostgreSQL:
 
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
+
+2. Backend:
+
+```bash
 cd backend
+cp .env.example .env
 npm install
-npx prisma migrate dev
+npx prisma migrate deploy
 npm run dev
+```
 
-Para rodar o frontend:
-Abra um segundo terminal, entre na pasta do frontend, instale as dependências e inicie o servidor de interface.
-Bash
+3. Frontend (outro terminal):
 
+```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
+```
+
+A interface fica em http://localhost:5173
+
+## Deploy para recrutadores
+
+Guia passo a passo (Vercel/Firebase + Render + Docker): **[DEPLOY.md](./DEPLOY.md)**
+
+## Stack
+
+- Frontend: React, Vite, Tailwind, Socket.io client  
+- Backend: Express, Socket.io, Prisma, PostgreSQL  
+- Infra: Docker, Render, Vercel (ou Firebase Hosting)
