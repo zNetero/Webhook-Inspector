@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./
-ENV DATABASE_URL="postgresql://webhook:webhook@db:5432/webhook?schema=public"
+ENV DATABASE_URL="postgresql://postgres:YOUR_SUPABASE_PASSWORD@db.uaqyvjejnzwfsnczyozb.supabase.co:5432/postgres?sslmode=require"
 RUN npm ci
 
 COPY tsconfig.json ./
@@ -23,7 +23,7 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
-ENV DATABASE_URL="postgresql://webhook:webhook@db:5432/webhook?schema=public"
+ENV DATABASE_URL="postgresql://postgres:YOUR_SUPABASE_PASSWORD@db.uaqyvjejnzwfsnczyozb.supabase.co:5432/postgres?sslmode=require"
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
