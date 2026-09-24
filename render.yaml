@@ -1,0 +1,25 @@
+# Blueprint Render: backend + PostgreSQL
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: webhook-inspector-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /test
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: webhook-inspector-db
+          property: connectionString
+      - key: FRONTEND_URL
+        sync: false
+
+databases:
+  - name: webhook-inspector-db
+    plan: free
+    databaseName: webhook
+    user: webhook
