@@ -82,7 +82,7 @@ export class WebhookController {
                 body: JSON.parse(hook.body),
             }))
 
-            res.status(200.).json(formattedWebhooks);
+            res.status(200).json(formattedWebhooks);
         } catch (error) {
             console.error('Erro ao listar webhooks:', error);
             res.status(500).json({ error: 'Erro interno ao buscar webhooks' });

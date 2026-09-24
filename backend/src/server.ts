@@ -14,8 +14,14 @@ const httpServer = createServer(app);
 
 initSocket(httpServer);
 
+const corsOrigins = process.env.FRONTEND_URL?.split(',').map((o) => o.trim()).filter(Boolean);
+
 //Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: corsOrigins?.length ? corsOrigins : true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
